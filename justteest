@@ -1,0 +1,231 @@
+-- FINAL FULL VERSION - Roblox Bypass GUI Script
+-- Requirements: Executor (not Roblox Studio)
+
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Hide CoreGui (ESC menu, inventory, reset button, etc.)
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+
+-- Remove existing GUI if already present
+if PlayerGui:FindFirstChild("BypassGUI") then
+    PlayerGui:FindFirstChild("BypassGUI"):Destroy()
+end
+
+-- Create GUI
+local screenGui = Instance.new("ScreenGui", PlayerGui)
+screenGui.Name = "BypassGUI"
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 9999999
+screenGui.ResetOnSpawn = false
+
+-- Fullscreen frame
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(1, 0, 1, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = false
+mainFrame.Draggable = false
+
+-- Avatar Image
+local avatar = Instance.new("ImageLabel", mainFrame)
+avatar.Size = UDim2.new(0, 100, 0, 100)
+avatar.Position = UDim2.new(0.5, -50, 0.3, -100)
+avatar.BackgroundTransparency = 1
+avatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. LocalPlayer.UserId .. "&width=420&height=420&format=png"
+
+-- Username with gradient
+local username = Instance.new("TextLabel", mainFrame)
+username.Size = UDim2.new(0, 300, 0, 40)
+username.Position = UDim2.new(0.5, -150, 0.3, 10)
+username.BackgroundTransparency = 1
+username.Text = LocalPlayer.Name
+username.TextColor3 = Color3.new(1, 1, 1)
+username.Font = Enum.Font.SourceSansBold
+username.TextScaled = true
+
+local gradient = Instance.new("UIGradient", username)
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 128, 255))
+}
+
+-- Bypassing Anti-Cheat Wall Typewriter Effect
+local bypassText = Instance.new("TextLabel", mainFrame)
+bypassText.Size = UDim2.new(0, 600, 0, 50)
+bypassText.Position = UDim2.new(0.5, -300, 0.45, 0)
+bypassText.BackgroundTransparency = 1
+bypassText.Text = ""
+bypassText.TextColor3 = Color3.new(0.6, 0.6, 1)
+bypassText.Font = Enum.Font.SourceSansBold
+bypassText.TextScaled = true
+
+-- Red flashing warning
+local warning = Instance.new("TextLabel", mainFrame)
+warning.Size = UDim2.new(0, 700, 0, 40)
+warning.Position = UDim2.new(0.5, -350, 0.8, 0)
+warning.BackgroundTransparency = 1
+warning.Text = "⚠️ Warning: Please don't leave, it can cause you ban."
+warning.TextColor3 = Color3.new(1, 0, 0)
+warning.Font = Enum.Font.SourceSansBold
+warning.TextScaled = true
+
+-- Flash effect
+task.spawn(function()
+    while true do
+        TweenService:Create(warning, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+        wait(0.5)
+        TweenService:Create(warning, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
+        wait(0.5)
+    end
+end)
+
+-- Progress bar background
+local progressBg = Instance.new("Frame", mainFrame)
+progressBg.Size = UDim2.new(0.5, 0, 0, 25)
+progressBg.Position = UDim2.new(0.25, 0, 0.65, 0)
+progressBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+progressBg.BorderSizePixel = 0
+progressBg.ClipsDescendants = true
+progressBg.ZIndex = 2
+progressBg.BackgroundTransparency = 0
+
+local progressFill = Instance.new("Frame", progressBg)
+progressFill.Size = UDim2.new(0, 0, 1, 0)
+progressFill.Position = UDim2.new(0, 0, 0, 0)
+progressFill.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
+progressFill.BorderSizePixel = 0
+progressFill.ZIndex = 3
+
+local fillGradient = Instance.new("UIGradient", progressFill)
+fillGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 128, 255))
+}
+
+-- Fake Complete message
+local completeMsg = Instance.new("TextLabel", mainFrame)
+completeMsg.Size = UDim2.new(0, 500, 0, 60)
+completeMsg.Position = UDim2.new(0.5, -250, 0.72, 0)
+completeMsg.BackgroundTransparency = 1
+completeMsg.Text = ""
+completeMsg.TextColor3 = Color3.new(0, 1, 0)
+completeMsg.Font = Enum.Font.SourceSansBold
+completeMsg.TextScaled = true
+
+-- Typewriter Function
+local function typeWriter(label, text, speed)
+    label.Text = ""
+    for i = 1, #text do
+        label.Text = string.sub(text, 1, i)
+        wait(speed)
+    end
+end
+
+-- Show Typewriter every 30 seconds
+task.spawn(function()
+    while true do
+        typeWriter(bypassText, "Bypassing Anti-Cheat Wall...", 0.05)
+        wait(30)
+    end
+end)
+
+-- Animate Progress (1% every 3 seconds = 300s total)
+task.spawn(function()
+    for i = 1, 100 do
+        TweenService:Create(progressFill, TweenInfo.new(2.5), {
+            Size = UDim2.new(i / 100, 0, 1, 0)
+        }):Play()
+        wait(3)
+    end
+
+    -- When complete:
+    completeMsg.Text = "✅ Bypass Complete! Please wait 5 minutes to run the script..."
+    bypassText.Text = ""
+    warning.Text = ""
+
+    -- Optional: Freeze further interaction
+    wait(300)
+    completeMsg.Text = "✅ Script Ready. You may now run your exploit."
+end)
+
+-- Block ESC key or leave button
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.Escape then
+        warning.Text = "⚠️ ESC is blocked. Bypass still in progress..."
+    end
+end)
+
+-- Background Music (Raining Tacos @ 50% volume)
+local music = Instance.new("Sound", mainFrame)
+music.SoundId = "rbxassetid://142376088" -- Updated Raining Tacos ID
+music.Volume = 0.5
+music.Looped = true
+music.Playing = true
+music.Name = "BackgroundMusic"
+music:Play()fillGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 128, 255))
+}
+
+-- Animate Progress (1% per minute)
+task.spawn(function()
+    for i = 1, 100 do
+        TweenService:Create(progressFill, TweenInfo.new(60), {
+            Size = UDim2.new(i / 100, 0, 1, 0)
+        }):Play()
+        wait(60)
+    end
+end)
+
+-- Typewriter Function
+local function typeWriter(label, text, speed)
+    label.Text = ""
+    for i = 1, #text do
+        label.Text = string.sub(text, 1, i)
+        wait(speed)
+    end
+end
+
+-- Show Typewriter every 30 seconds
+task.spawn(function()
+    while true do
+        typeWriter(bypassText, "Bypassing Anti-Cheat Wall", 0.05)
+        wait(30)
+    end
+end)fillGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 128, 255))
+}
+
+-- Animate Progress (1% per minute)
+task.spawn(function()
+    for i = 1, 100 do
+        TweenService:Create(progressFill, TweenInfo.new(60), {
+            Size = UDim2.new(i / 100, 0, 1, 0)
+        }):Play()
+        wait(60)
+    end
+end)
+
+-- Typewriter Function
+local function typeWriter(label, text, speed)
+    label.Text = ""
+    for i = 1, #text do
+        label.Text = string.sub(text, 1, i)
+        wait(speed)
+    end
+end
+
+-- Show Typewriter every 30 seconds
+task.spawn(function()
+    while true do
+        typeWriter(bypassText, "Bypassing Anti-Cheat Wall", 0.05)
+        wait(30)
+    end
+end)
